@@ -21,14 +21,14 @@ jobs:
     - name: Module installieren
       run: |
         python -m pip install --upgrade pip
-        pip install pyinstaller customtkinter PyPDF2 PyMuPDF pillow python-dotenv groq
-    
-    - name: EXE mit PyInstaller bauen
-      run: |
-        pyinstaller --name LearnTut --onefile --windowed --add-data "logo.png;." --icon=logo.png app.py
+        pip install pyinstaller customtkinter PyPDF2 PyMuPDF pillow python-dotenv groq sentence-transformers torch transformers pydantic
 
-    - name: EXE hochladen
+    - name: App mit PyInstaller bauen
+      run: |
+        pyinstaller --name "LearnTut" --windowed --add-data "logo.png;." --icon="logo.png" --collect-all customtkinter --collect-all pymupdf --collect-all sentence_transformers --collect-all transformers --collect-all torch --collect-all groq --collect-all pydantic --hidden-import PIL._tkinter_finder app.py
+
+    - name: App-Ordner hochladen
       uses: actions/upload-artifact@v4
       with:
         name: LearnTut-Windows
-        path: dist/LearnTut.exe
+        path: dist/LearnTut/

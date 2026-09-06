@@ -33,6 +33,23 @@ gespeicherte_pdfs = {}
 
 app = c.CTk()
 app.title("LearnTut")
+
+
+app.iconname("LearnTut") 
+
+
+if platform.system() == "Windows":
+    import ctypes
+    try:
+        myappid = 'learntut.desktop.app.1'
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+    except Exception:
+        pass
+
+
+
+
+
 c.set_appearance_mode("dark")
 app.configure(fg_color="#313338")
 
@@ -47,7 +64,7 @@ def hole_ressourcen_pfad(dateiname):
 try:
     logo_pfad = hole_ressourcen_pfad("logo.png")
     icon_bild = ImageTk.PhotoImage(Image.open(logo_pfad))
-    app.wm_iconphoto(False, icon_bild)
+    app.wm_iconphoto(True, icon_bild)
 except Exception as e:
     pass 
 
@@ -56,8 +73,10 @@ def nachricht_senden():
     if text.strip() == "" and len(aktuelle_bilder) == 0:
         return
    
+    chatfenster.configure(state="normal") 
     chatfenster.insert("end", "\n👤 Du:\n" + text + "\n\n")
-
+    chatfenster.see("end") 
+    chatfenster.configure(state="disabled") 
 
     def worker():
         antwort = tutor.generiere_antwort(text, aktuelle_bilder)
@@ -81,8 +100,14 @@ def antwort_anzeigen(antwort):
     button.configure(state="normal", text="Senden")
     aktuelle_bilder.clear()
     update_bild_vorschau()
-    chatfenster.insert("end", "🎓 Tutor:\n" + antwort + "\n\n━━━━━━━━━━━━━━━━━━━━━━━━\n")
-
+    chatfenster.configure(state="normal")
+    chatfenster.insert("end", "🎓 Tutor:\n", "bold")
+    
+    render_markdown(chatfenster, antwort)
+    
+    chatfenster.insert("end", "\n━━━━━━━━━━━━━━━━━━━━━━━━\n")
+    chatfenster.see("end")
+    chatfenster.configure(state="disabled")
 
 
 
@@ -171,6 +196,8 @@ def fachwechsel(gewealtesfach):
     global aktuellesfach
     aktuellesfach = gewealtesfach
 
+
+    chatfenster.configure(state="normal")
     chatfenster.delete("1.0", "end")
     verlauf = tutor.ladefach(gewealtesfach)
     for nachricht in verlauf:
@@ -181,8 +208,12 @@ def fachwechsel(gewealtesfach):
             else:
                 chatfenster.insert("end", "\n👤 Du:\n" + nachricht["content"] + "\n\n")
         if nachricht["role"] == "assistant":
-            chatfenster.insert("end", "🎓 Tutor:\n" + nachricht["content"] + "\n\n━━━━━━━━━━━━━━━━━━━━━━━━\n")
+            chatfenster.insert("end", "🎓 Tutor:\n", "bold")
+            render_markdown(chatfenster, nachricht["content"])
+            chatfenster.insert("end", "\n━━━━━━━━━━━━━━━━━━━━━━━━\n")
     chatfenster.insert("end", "--- Workspace: " + aktuellesfach + " geladen ---\n")
+    chatfenster.see("end")
+    chatfenster.configure(state="disabled")
 
     if os.path.exists("config.json"):
         with open("config.json", "r") as f:
@@ -253,6 +284,9 @@ def chat_leeren():
     if value == True:
         tutor.chat_leeren()
         chatfenster.delete("1.0", "end")
+    global aktuellesfach
+    fachwechsel(aktuellesfach)
+    
 
 
     
@@ -361,11 +395,14 @@ def aufgabe_schliessen():
 
 def bild_einfuegen(event):
     global aktuelle_bilder
-    bild = ImageGrab.grabclipboard()
+    try:
+        bild = ImageGrab.grabclipboard()
 
-    if bild is not None:
-        aktuelle_bilder.append(bild)
-    update_bild_vorschau()
+        if bild is not None:
+            aktuelle_bilder.append(bild)
+        update_bild_vorschau()
+    except Exception:
+        pass
 
 def bild_loeschen(index):
     global aktuelle_bilder
@@ -539,6 +576,29 @@ def check_api_key():
             return
     tutor.setze_api_key(config["api_key"])
 
+def render_markdown(textbox, text):
+    zeilen = text.split('\n')
+    for zeile in zeilen:
+        aktueller_tag = None
+        if zeile.startswith("### "):
+            zeile = zeile[4:]
+            aktueller_tag = "heading"
+        elif zeile.startswith("## "):
+            zeile = zeile[3:]
+            aktueller_tag = "heading"
+        
+        if aktueller_tag:
+            zeile = zeile.replace("**", "") 
+            textbox.insert("end", zeile + "\n", aktueller_tag)
+        else:
+            teile = zeile.split("**")
+            for i, teil in enumerate(teile):
+                if i % 2 == 1:
+                    textbox.insert("end", teil, "bold")
+                else:
+                    textbox.insert("end", teil)
+            textbox.insert("end", "\n")
+
 
 
 welcome_frame = c.CTkFrame(app)
@@ -556,11 +616,16 @@ upload_Aufgaben= c.CTkButton(box_Aufgaben, text="Upload", command=lambda: dokume
 centerframe = c.CTkFrame(app, fg_color="transparent")
 rightframe = c.CTkFrame(app, fg_color="#2b2d31")
 
+bold_font = c.CTkFont(family="Segoe UI", size=14, weight="bold")
+heading_font = c.CTkFont(family="Segoe UI", size=16, weight="bold")
+chatfenster = c.CTkTextbox(centerframe, width=700, height=400, fg_color="#1e1f22", corner_radius=8, font=("Segoe UI", 14), wrap="word")
+chatfenster.configure(state="disabled")
+chatfenster._textbox.tag_config("bold", font=bold_font)
+chatfenster._textbox.tag_config("heading", font=heading_font, foreground="#5865F2")
 
-chatfenster = c.CTkTextbox(centerframe, width=700, height=400, fg_color="#1e1f22", corner_radius=8, font=("Segoe UI", 14))
 toolbar = c.CTkFrame(centerframe)
 eingabe_frame = c.CTkFrame(centerframe, fg_color="transparent")
-eingabefeld = c.CTkTextbox(eingabe_frame, width=700, height=70, fg_color="#1e1f22", border_width=0, corner_radius=8, font=("Segoe UI", 14))
+eingabefeld = c.CTkTextbox(eingabe_frame, width=700, height=70, fg_color="#1e1f22", border_width=0, corner_radius=8, font=("Segoe UI", 14), wrap="word")
 eingabefeld.bind("<Control-v>", bild_einfuegen)
 eingabefeld.bind("<Return>", enter_senden)
 bild_vorschau_frame = c.CTkFrame(centerframe, fg_color="transparent")

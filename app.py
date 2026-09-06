@@ -113,7 +113,13 @@ def antwort_anzeigen(antwort):
 
 #layout
 app.geometry("1400x800")
-app.attributes('-zoomed', True)
+if platform.system() == "Windows": 
+    app.state("zoomed")
+
+
+
+else:
+    app.attributes('-zoomed', True)
 
 
 #slidebar

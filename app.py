@@ -11,6 +11,7 @@ from PIL import Image, ImageTk, ImageGrab
 import threading
 import sys
 import platform
+import multiprocessing
 
 
 if platform.system() == "Windows":
@@ -707,4 +708,9 @@ if os.path.exists("config.json"):
 fachladen()
 if aktuellesfach == "":
     zeige_welcome_screen()
-app.mainloop()
+
+
+
+if __name__ == "__main__":
+    multiprocessing.freeze_support()
+    app.mainloop()

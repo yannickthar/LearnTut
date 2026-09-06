@@ -277,12 +277,11 @@ def generiere_antwort(eingabe, bilder=None):
             )
         ki_text= antwort.choices[0].message.content
     except Exception as e:
-         return "System-Fehler: Konnte keine Verbindung zur KI herstellen"
-    roh_text = ki_text
+         return f"System-Fehler: {str(e)}"
     ki_text = re.sub(r"<think>.*?(?:</think>|$)", "", ki_text, flags=re.DOTALL).strip()
     
     if not ki_text:
-        return f"Hier ist der abgeschnittene Gedankengang: {roh_text}"
+        return "Fehler: Die KI hat nur nachgedacht, aber keine fertige Antwort geliefert."
     preanswer.append({"role": "assistant", "content": ki_text})
     with open(aktuelledatei, "w") as f:
         json.dump(preanswer, f, indent=4)

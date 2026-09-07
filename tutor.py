@@ -273,7 +273,7 @@ def generiere_antwort(eingabe, bilder=None):
         antwort = client.chat.completions.create(
             model = config.get("modell", "qwen/qwen3.6-27b"),
             messages= apinachrichten,
-            max_tokens=8000
+            max_tokens=950
             )
         ki_text= antwort.choices[0].message.content
     except Exception as e:

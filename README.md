@@ -1,5 +1,5 @@
 LearnTut
-Ein KI-Tutor, den ich in Python entwickelt habe. Läuft mit der Groq API.
+Ein KI-Tutor, den ich in Python entwickelt habe. LearnTut ist mein erstes größeres Python-Projekt und ein funktionierender Prototyp. Läuft mit der Groq API.
 Man kann eigene Vorlesungsskripte, Altklausuren und Arbeitsblätter als PDF hochladen und mit dem Tutor Aufgaben bearbeiten. Dabei gibt er Tipps und begleitet einen Schritt für Schritt, statt direkt die Lösung vorzugeben.
 
 Features

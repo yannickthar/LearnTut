@@ -236,7 +236,7 @@ def generiere_antwort(eingabe, bilder=None):
     preanswer.append({"role": "user", "content": eingabe})
 
     apinachrichten = preanswer.copy()
-    # Aktuelle Settings auch für bereits gespeicherte Chats übernehmen.
+    
     if apinachrichten and apinachrichten[0]["role"] == "system":
         apinachrichten[0] = {"role": "system", "content": lade_system_prompt()}
     else:
